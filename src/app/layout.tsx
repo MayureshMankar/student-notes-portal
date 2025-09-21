@@ -22,15 +22,13 @@ export const metadata: Metadata = {
     description: 'Access and share high-quality study notes with our premium platform designed for students and educators.',
     type: 'website',
     locale: 'en_US',
-    url: 'https://noteshub.example.com',
+    url: 'https://student-notes-portal.vercel.app',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'NotesHub - Premium Study Materials Platform',
     description: 'Access and share high-quality study notes with our premium platform designed for students and educators.',
   },
-  // PWA metadata
-  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

@@ -4,15 +4,7 @@ const urlsToCache = [
   '/dashboard',
   '/upload',
   '/login',
-  '/instructions',
-  '/_next/static/css/app/layout.css',
-  '/_next/static/css/app/page.css',
-  '/_next/static/chunks/main-app.js',
-  '/_next/static/chunks/pages/index.js',
-  '/_next/static/chunks/pages/dashboard.js',
-  '/_next/static/chunks/pages/upload.js',
-  '/_next/static/chunks/pages/login.js',
-  '/_next/static/chunks/pages/instructions.js',
+  '/instructions'
 ];
 
 // Install event - cache static assets
@@ -23,16 +15,29 @@ self.addEventListener('install', (event) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
+      .catch((error) => {
+        console.log('Failed to cache URLs:', error);
+      })
   );
 });
 
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', (event) => {
+  // Skip caching for API requests
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
         // Return cached version or fetch from network
-        return response || fetch(event.request);
+        return response || fetch(event.request).catch(() => {
+          // If both fail, try to serve the index page for client-side routing
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+        });
       })
   );
 });

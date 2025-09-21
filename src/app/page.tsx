@@ -26,6 +26,9 @@ export default function Home() {
     const fetchPublicNotes = async () => {
       try {
         const response = await fetch('/api/notes');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         
         if (data.success) {
@@ -34,10 +37,11 @@ export default function Home() {
           setPublicNotes(publicNotesData);
           setFilteredNotes(publicNotesData);
         } else {
-          setError('Failed to fetch public notes');
+          setError(data.error || 'Failed to fetch public notes');
         }
       } catch (error) {
-        setError('Failed to fetch public notes');
+        console.error('Error fetching public notes:', error);
+        setError('Failed to fetch public notes. Please try again later.');
       } finally {
         setLoading(false);
       }

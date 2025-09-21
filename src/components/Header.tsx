@@ -6,7 +6,10 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 // Dynamically import HeaderSearch to avoid SSR issues with useSearchParams
-const HeaderSearch = dynamic(() => import('./HeaderSearch'), { ssr: false });
+const HeaderSearch = dynamic(() => import('./HeaderSearch'), { 
+  ssr: false,
+  loading: () => <div style={{ height: '40px' }}></div> // Add loading placeholder
+});
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
