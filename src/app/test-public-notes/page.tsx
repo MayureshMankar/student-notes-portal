@@ -67,7 +67,7 @@ export default function TestPublicNotes() {
         marginBottom: '2rem',
         color: '#f8f8f2'
       }}>
-        Public Notes Preview
+        Public Notes
       </h1>
       
       <div className="notes-grid">

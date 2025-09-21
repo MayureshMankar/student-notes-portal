@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import NoteCard from '@/components/NoteCard';
+import NoteCard from '../../components/NoteCard';
 import { INote } from '@/models/Note';
 
 // Define the user interface
@@ -59,7 +59,7 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       // Get session from localStorage
       const sessionId = localStorage.getItem('sessionId');
@@ -97,9 +97,9 @@ export default function DashboardPage() {
       // Redirect to login on any auth error
       router.push('/login');
     }
-  };
+  }, [router]);
 
-  const fetchUserNotes = async (sessionId: string) => {
+  const fetchUserNotes = useCallback(async (sessionId: string) => {
     try {
       setLoading(true);
       setError('');
@@ -129,7 +129,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleDelete = async (noteId: string) => {
     try {

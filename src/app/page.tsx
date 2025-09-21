@@ -7,13 +7,19 @@ import PublicNoteCard from '../components/PublicNoteCard';
 import HeaderSearch from '../components/HeaderSearch';
 import { INote } from '../models/Note';
 
+// Define a proper user type instead of using any
+interface User {
+  loggedIn: boolean;
+  // Add other user properties as needed
+}
+
 export default function Home() {
   const [publicNotes, setPublicNotes] = useState<INote[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<INote[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [user, setUser] = useState<any>(null); // Simplified user state
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -42,7 +48,7 @@ export default function Home() {
     // Check if user is logged in
     const sessionId = localStorage.getItem('sessionId');
     if (sessionId) {
-      setUser({ loggedIn: true }); // Simplified user object
+      setUser({ loggedIn: true });
     }
   }, []);
 
