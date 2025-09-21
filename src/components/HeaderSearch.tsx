@@ -46,6 +46,64 @@ export default function HeaderSearch({ onSearch }: { onSearch?: (query: string) 
     // For form submission, we'll just let the effect handle it
   };
 
+  // Don't render anything during SSR to avoid issues with useSearchParams
+  if (typeof window === 'undefined') {
+    return (
+      <form 
+        onSubmit={handleSearch} 
+        style={{ 
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          position: 'relative'
+        }}
+      >
+        <div className="search-icon-container">
+          <svg 
+            style={{ 
+              height: '1.25rem',
+              width: '1.25rem',
+              color: '#aaa'
+            }} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input
+          type="text"
+          placeholder="Search notes..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="header-search-input"
+          style={{
+            paddingLeft: '2.5rem',
+            paddingRight: '1rem'
+          }}
+        />
+        <button
+          type="submit"
+          className="header-search-button"
+        >
+          <svg 
+            style={{ 
+              height: '1.25rem',
+              width: '1.25rem',
+              color: '#f8f8f2'
+            }} 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </form>
+    );
+  }
+
   return (
     <form 
       onSubmit={handleSearch} 

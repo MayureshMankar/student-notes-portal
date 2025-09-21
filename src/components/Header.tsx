@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import HeaderSearch from './HeaderSearch';
+import dynamic from 'next/dynamic';
+
+// Dynamically import HeaderSearch to avoid SSR issues with useSearchParams
+const HeaderSearch = dynamic(() => import('./HeaderSearch'), { ssr: false });
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
