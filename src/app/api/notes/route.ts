@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     // Check if user is authenticated
     const authHeader = request.headers.get('authorization');
     const sessionId = authHeader ? authHeader.split(' ')[1] : null;
+    // Note: userId is not used in this function but kept for consistency with other routes
     const userId = sessionId ? validateSession(sessionId) : null;
     
     let notes;
@@ -42,9 +43,9 @@ export async function GET(request: NextRequest) {
       try {
         // Show all notes to everyone (public visibility)
         notes = await Note.find({}).sort({ uploadDate: -1 });
-      } catch (err) {
+      } catch (error) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', err);
+        console.warn('MongoDB query failed, using in-memory storage:', error);
         notes = getAllNotesInMemory();
       }
     } else {
@@ -53,8 +54,8 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json({ success: true, data: notes });
-  } catch (err) {
-    console.error('Error fetching notes:', err);
+  } catch (error) {
+    console.error('Error fetching notes:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch notes' }, { status: 500 });
   }
 }

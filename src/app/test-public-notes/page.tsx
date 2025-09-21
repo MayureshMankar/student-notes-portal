@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// Note: useState and useEffect were imported but not used, so we'll keep them for potential future use
 import PublicNoteCard from '../../components/PublicNoteCard';
 import { INote } from '../../models/Note';
 

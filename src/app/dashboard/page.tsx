@@ -40,7 +40,7 @@ export default function DashboardPage() {
       // If we're on the server, don't show loading state
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   // Check online status
   useEffect(() => {

@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     try {
       user = await User.findById(userId);
       console.log('Found user in MongoDB:', user?._id);
-    } catch (err) {
+    } catch (error) {
       // Fallback to in-memory storage
       console.log('Falling back to in-memory storage for user lookup');
       user = findUserByIdInMemory(userId);

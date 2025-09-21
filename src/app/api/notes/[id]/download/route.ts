@@ -17,9 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // Try to use MongoDB
       try {
         note = await Note.findById(id);
-      } catch (err) {
+      } catch (error) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', err);
+        console.warn('MongoDB query failed, using in-memory storage:', error);
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (isConnected) {
       try {
         await Note.findByIdAndUpdate(id, { $inc: { downloadCount: 1 } });
-      } catch (err) {
-        console.warn('Failed to update download count in MongoDB:', err);
+      } catch (error) {
+        console.warn('Failed to update download count in MongoDB:', error);
         // Fallback to in-memory update
         updateNoteInMemory(id, { downloadCount: (note.downloadCount || 0) + 1 });
       }

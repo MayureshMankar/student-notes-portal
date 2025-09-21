@@ -1,110 +1,163 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import PublicNoteCard from '@/components/PublicNoteCard';
-import HeaderSearch from '@/components/HeaderSearch';
-import { INote } from '@/models/Note';
-import { useSearchParams } from 'next/navigation';
-
-// Define the user interface
-interface IUser {
-  _id: string;
-  name: string;
-  email: string;
-  createdAt: string;
-  notes: string[];
-}
-
-// Define the session validation response interface
-interface SessionValidationResponse {
-  success: boolean;
-  data?: {
-    user: IUser;
-  };
-  error?: string;
-}
+import PublicNoteCard from '../components/PublicNoteCard';
+import HeaderSearch from '../components/HeaderSearch';
+import { INote } from '../models/Note';
 
 export default function Home() {
-  const [notes, setNotes] = useState<INote[]>([]);
+  const [publicNotes, setPublicNotes] = useState<INote[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<INote[]>([]);
-  const [user, setUser] = useState<IUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const searchParams = useSearchParams();
-  const urlSearchQuery = searchParams.get('search') || '';
+  const [user, setUser] = useState<any>(null); // Simplified user state
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchNotes = async () => {
+    const fetchPublicNotes = async () => {
       try {
-        const res = await fetch('/api/notes');
-        const result = await res.json();
-        // Extract the data array from the response
-        const data: INote[] = Array.isArray(result) ? result : (result.data || []);
-        setNotes(data);
-        setFilteredNotes(data);
+        const response = await fetch('/api/notes');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Filter for public notes only
+          const publicNotesData = data.data.filter((note: INote) => !note.isPasswordProtected);
+          setPublicNotes(publicNotesData);
+          setFilteredNotes(publicNotesData);
+        } else {
+          setError('Failed to fetch public notes');
+        }
       } catch (error) {
-        console.error('Failed to fetch notes:', error);
-        // Set empty array on error
-        setNotes([]);
-        setFilteredNotes([]);
+        setError('Failed to fetch public notes');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchNotes();
+    fetchPublicNotes();
     
     // Check if user is logged in
-    const checkAuth = async () => {
-      try {
-        const sessionId = localStorage.getItem('sessionId');
-        if (sessionId) {
-          const response = await fetch('/api/auth/validate', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ sessionId })
-          });
-          
-          const data = await response.json();
-          
-          if (data.success) {
-            setUser(data.data.user);
-          }
-        }
-      } catch (err) {
-        console.error('Auth check error:', err);
-      }
-    };
-    
-    checkAuth();
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId) {
+      setUser({ loggedIn: true }); // Simplified user object
+    }
   }, []);
-
-  // Handle search from URL params
-  useEffect(() => {
-    setSearchQuery(urlSearchQuery);
-  }, [urlSearchQuery]);
-
-  // Filter notes based on search query
-  useEffect(() => {
-    if (!Array.isArray(notes)) {
-      setFilteredNotes([]);
-      return;
-    }
-    
-    if (searchQuery) {
-      const filtered = notes.filter(note => 
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.subject.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredNotes(filtered);
-    } else {
-      setFilteredNotes(notes);
-    }
-  }, [searchQuery, notes]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    if (query) {
+      const filtered = publicNotes.filter(note => 
+        note.title.toLowerCase().includes(query.toLowerCase()) ||
+        note.subject.toLowerCase().includes(query.toLowerCase()) ||
+        note.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+      );
+      setFilteredNotes(filtered);
+    } else {
+      setFilteredNotes(publicNotes);
+    }
   };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(to bottom right, #000000, #0a0a0a)',
+        padding: '2.5rem 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            border: '3px solid #f8f8f2',
+            borderTop: '3px solid #0a0a0a',
+            borderRadius: '50%',
+            width: '3rem',
+            height: '3rem',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto'
+          }}></div>
+          <p style={{ marginTop: '1.25rem', color: '#f8f8f2', fontSize: '1.125rem' }}>Loading notes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(to bottom right, #000000, #0a0a0a)',
+        padding: '2.5rem 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ 
+          background: 'linear-gradient(145deg, #0a0a0a, #1a1a1a)',
+          borderRadius: '1.25rem',
+          padding: '2.25rem',
+          maxWidth: '32rem',
+          textAlign: 'center',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg, transparent, #f8f8f2, transparent)'
+          }}></div>
+          <div style={{ 
+            background: 'rgba(220, 53, 69, 0.15)',
+            borderRadius: '50%',
+            width: '4rem',
+            height: '4rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem',
+            color: '#f8f8f2'
+          }}>
+            <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '2rem', width: '2rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 style={{ 
+            fontSize: '1.75rem',
+            fontWeight: '700',
+            color: '#f8f8f2',
+            marginBottom: '1.25rem'
+          }}>Error</h2>
+          <p style={{ color: '#f8f8f2', marginBottom: '1.75rem', fontSize: '1.05rem' }}>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="premium-btn-primary premium-btn-hover"
+            style={{
+              background: '#f8f8f2',
+              color: '#0a0a0a',
+              fontWeight: '700',
+              padding: '0.875rem 1.75rem',
+              borderRadius: '0.75rem',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.05rem',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)'
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="premium-container">
@@ -251,7 +304,7 @@ export default function Home() {
         </h2>
         {filteredNotes.length > 0 ? (
           <div className="notes-grid">
-            {filteredNotes.map((note, index) => (
+            {filteredNotes.map((note: INote, index: number) => (
               <div 
                 key={note._id} 
                 className="fade-in-up"

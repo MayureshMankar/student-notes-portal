@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       let existingUser;
       try {
         existingUser = await User.findOne({ email });
-      } catch (err) {
+      } catch (error) {
         // Fallback to in-memory storage
         existingUser = findUserByEmailInMemory(email);
       }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       let user;
       try {
         user = await User.create(userData);
-      } catch (err) {
+      } catch (error) {
         // Fallback to in-memory storage
         user = createUserInMemory(userData);
       }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       let user;
       try {
         user = await User.findOne({ email });
-      } catch (err) {
+      } catch (error) {
         // Fallback to in-memory storage
         user = findUserByEmailInMemory(email);
       }
@@ -110,8 +110,8 @@ export async function POST(request: NextRequest) {
           });
           console.log('Associated legacy notes with user (in-memory):', count);
         }
-      } catch (err) {
-        console.warn('Failed to associate legacy notes with user:', err);
+      } catch (error) {
+        console.warn('Failed to associate legacy notes with user:', error);
       }
       
       // Return session ID to client

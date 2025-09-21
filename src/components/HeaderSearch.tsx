@@ -11,28 +11,34 @@ export default function HeaderSearch({ onSearch }: { onSearch?: (query: string) 
 
   // Initialize search query from URL params
   useEffect(() => {
-    const currentQuery = searchParams.get('search') || '';
-    setSearchQuery(currentQuery);
+    // Only run on client side
+    if (typeof window !== 'undefined' && searchParams) {
+      const currentQuery = searchParams.get('search') || '';
+      setSearchQuery(currentQuery);
+    }
   }, [searchParams]);
 
   // Handle real-time search
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (onSearch) {
-        onSearch(searchQuery);
-      } else {
-        // Update URL without page reload
-        const params = new URLSearchParams(searchParams.toString());
-        if (searchQuery) {
-          params.set('search', searchQuery);
+    // Only run on client side
+    if (typeof window !== 'undefined' && searchParams) {
+      const delayDebounceFn = setTimeout(() => {
+        if (onSearch) {
+          onSearch(searchQuery);
         } else {
-          params.delete('search');
+          // Update URL without page reload
+          const params = new URLSearchParams(searchParams.toString());
+          if (searchQuery) {
+            params.set('search', searchQuery);
+          } else {
+            params.delete('search');
+          }
+          router.push(`${pathname}?${params.toString()}`, { scroll: false });
         }
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-      }
-    }, 300); // Debounce for 300ms
+      }, 300); // Debounce for 300ms
 
-    return () => clearTimeout(delayDebounceFn);
+      return () => clearTimeout(delayDebounceFn);
+    }
   }, [searchQuery, router, pathname, searchParams, onSearch]);
 
   const handleSearch = (e: React.FormEvent) => {

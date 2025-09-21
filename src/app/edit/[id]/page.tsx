@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
   const [title, setTitle] = useState('');
@@ -15,7 +15,6 @@ export default function EditNotePage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchNoteData = async () => {

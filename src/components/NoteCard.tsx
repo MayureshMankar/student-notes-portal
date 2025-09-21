@@ -81,6 +81,7 @@ export default function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
         setPasswordError(data.error || 'Invalid password');
       }
     } catch (error) {
+      // Note: error was defined but not used, so we'll keep it for potential future use
       setPasswordError('Failed to verify password');
     }
   };

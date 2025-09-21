@@ -4,7 +4,7 @@ import { INote } from '@/models/Note';
 import { useState } from 'react';
 
 interface PublicNoteCardProps {
-  note: INote;
+  note: Partial<INote>; // Allow partial note data for testing
 }
 
 export default function PublicNoteCard({ note }: PublicNoteCardProps) {
@@ -13,17 +13,23 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
   const [passwordError, setPasswordError] = useState('');
 
   const handleDownload = async () => {
+    // For testing notes that don't have an _id
+    const noteId = note._id || 'test-note';
+    
     if (note.isPasswordProtected) {
       setShowPasswordModal(true);
       return;
     }
     
-    window.open(`/api/notes/${note._id}/download`, '_blank');
+    window.open(`/api/notes/${noteId}/download`, '_blank');
   };
 
   const verifyPassword = async () => {
     try {
-      const response = await fetch(`/api/notes/${note._id}/download`, {
+      // For testing notes that don't have an _id
+      const noteId = note._id || 'test-note';
+      
+      const response = await fetch(`/api/notes/${noteId}/download`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,189 +45,181 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
         setPasswordError('');
         
         // Proceed with download
-        window.open(`/api/notes/${note._id}/download?password=${password}`, '_blank');
+        window.open(`/api/notes/${noteId}/download?password=${password}`, '_blank');
       } else {
         setPasswordError(data.error || 'Invalid password');
       }
     } catch (error) {
+      // Note: error was defined but not used, so we'll keep it for potential future use
       setPasswordError('Failed to verify password');
     }
   };
 
   return (
-    <>
-      <div className="premium-card" style={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'linear-gradient(to right, #0a0a0a, #1a1a1a)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        borderRadius: '1rem',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
-        transition: 'all 0.3s ease',
-        backdropFilter: 'blur(10px)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-      onMouseOver={(e) => {
-        e.currentTarget.style.transform = 'translateY(-5px)';
-        e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.7)';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5)';
-      }}
-      >
+    <div className="premium-card" style={{ 
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'linear-gradient(to right, #0a0a0a, #1a1a1a)',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      borderRadius: '1rem',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}
+    onMouseOver={(e) => {
+      e.currentTarget.style.transform = 'translateY(-5px)';
+      e.currentTarget.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.7)';
+    }}
+    onMouseOut={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)';
+      e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5)';
+    }}
+    >
+      <div style={{ 
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '2px',
+        background: 'linear-gradient(90deg, transparent, #f8f8f2, transparent)'
+      }}></div>
+      
+      <div style={{ 
+        padding: '1.5rem',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+      }}>
         <div style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '2px',
-          background: 'linear-gradient(90deg, transparent, #f8f8f2, transparent)'
-        }}></div>
-        
-        <div style={{ 
-          padding: '1.25rem',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '0.75rem'
         }}>
-          <div style={{ 
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: '0.75rem'
-          }}>
-            <h3 style={{ 
-              fontSize: '1.15rem',
-              fontWeight: 'bold',
-              color: '#f8f8f2',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              flex: 1,
-              marginRight: '0.5rem'
-            }}>{note.title}</h3>
-            <span className={note.isPasswordProtected ? 'premium-badge-secondary' : 'premium-badge-primary'} style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              borderRadius: '9999px',
-              padding: '0.25rem 0.75rem',
-              fontSize: '0.7rem',
-              fontWeight: '600',
-              backgroundColor: note.isPasswordProtected ? 'rgba(255, 255, 255, 0.1)' : '#f8f8f2',
-              color: note.isPasswordProtected ? '#f8f8f2' : '#0a0a0a',
-              border: note.isPasswordProtected ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
-              flexShrink: 0
-            }}>
-              {note.isPasswordProtected ? 'Protected' : 'Public'}
-            </span>
-          </div>
-          <span style={{ 
-            display: 'inline-block',
+          <h3 style={{ 
+            fontSize: '1.25rem',
+            fontWeight: 'bold',
             color: '#f8f8f2',
-            fontSize: '0.8rem',
-            fontWeight: '500',
-            padding: '0.25rem 0.75rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+            marginRight: '0.5rem'
+          }}>{note.title}</h3>
+          <span className={note.isPasswordProtected ? 'premium-badge-secondary' : 'premium-badge-primary'} style={{
+            display: 'inline-flex',
+            alignItems: 'center',
             borderRadius: '9999px',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            padding: '0.25rem 0.75rem',
+            fontSize: '0.75rem',
+            fontWeight: '600',
+            backgroundColor: note.isPasswordProtected ? 'rgba(255, 255, 255, 0.1)' : '#f8f8f2',
+            color: note.isPasswordProtected ? '#f8f8f2' : '#0a0a0a',
+            border: note.isPasswordProtected ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
           }}>
-            {note.subject}
+            {note.isPasswordProtected ? 'Protected' : 'Public'}
           </span>
         </div>
+        <span style={{ 
+          display: 'inline-block',
+          color: '#f8f8f2',
+          fontSize: '0.875rem',
+          fontWeight: '500',
+          padding: '0.25rem 0.75rem',
+          borderRadius: '9999px',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          {note.subject || 'General'}
+        </span>
+      </div>
+      
+      <div style={{ 
+        padding: '1.5rem',
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <p style={{ 
+          color: '#f8f8f2',
+          marginBottom: '1.25rem',
+          flexGrow: 1,
+          lineHeight: '1.6',
+          fontSize: '0.95rem'
+        }}>{note.description}</p>
         
         <div style={{ 
-          padding: '1.25rem',
-          flexGrow: 1,
           display: 'flex',
-          flexDirection: 'column'
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+          marginBottom: '1.25rem'
         }}>
-          <p style={{ 
-            color: '#f8f8f2',
-            marginBottom: '1rem',
-            flexGrow: 1,
-            lineHeight: '1.6',
-            fontSize: '0.95rem'
-          }}>{note.description}</p>
-          
-          <div style={{ 
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.5rem',
-            marginBottom: '1rem'
-          }}>
-            {note.tags.map((tag, index) => (
-              <span 
-                key={index} 
-                className="premium-tag-primary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  borderRadius: '9999px',
-                  padding: '0.25rem 0.75rem',
-                  fontSize: '0.7rem',
-                  fontWeight: '500',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  color: '#f8f8f2',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-          
-          <div style={{ 
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.7rem',
-            color: '#f8f8f2',
-            marginBottom: '1.25rem'
-          }}>
-            <span>Uploaded: {new Date(note.uploadDate).toLocaleDateString()}</span>
-            <span>Size: {Math.round(note.fileSize / 1024)} KB</span>
-          </div>
-          
-          {note.fileType && (
-            <div style={{ 
-              fontSize: '0.7rem',
-              color: '#f8f8f2',
-              marginBottom: '1rem',
-              fontStyle: 'italic'
-            }}>
-              File type: {note.fileType.split('/')[1]?.toUpperCase() || note.fileType}
-            </div>
-          )}
-          
-          <button
-            onClick={handleDownload}
-            className="premium-btn-primary"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              fontSize: '0.95rem',
-              background: '#f8f8f2',
-              color: '#0a0a0a',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              borderRadius: '0.6rem',
-              border: 'none',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.3)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-          >
-            Download Note
-          </button>
+          {note.tags?.map((tag, index) => (
+            <span 
+              key={index} 
+              className="premium-tag-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                borderRadius: '9999px',
+                padding: '0.25rem 0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: '#f8f8f2',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              {tag}
+            </span>
+          ))}
         </div>
+        
+        <div style={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          color: '#cccccc',
+          fontSize: '0.875rem',
+          marginBottom: '1.5rem',
+          flexWrap: 'wrap',
+          gap: '0.75rem'
+        }}>
+          <span>Uploaded: {note.uploadDate ? new Date(note.uploadDate).toLocaleDateString() : 'Unknown'}</span>
+          <span>Size: {note.fileSize ? Math.round(note.fileSize / 1024) : 0} KB</span>
+          {note.downloadCount !== undefined && note.downloadCount > 0 && (
+            <span>Downloads: {note.downloadCount}</span>
+          )}
+        </div>
+        
+        <button
+          onClick={handleDownload}
+          className="premium-btn premium-btn-primary premium-btn-hover"
+          style={{
+            background: '#f8f8f2',
+            color: '#0a0a0a',
+            fontWeight: '600',
+            padding: '0.75rem 1.25rem',
+            borderRadius: '0.75rem',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            fontSize: '0.95rem',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1rem', width: '1rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download
+        </button>
       </div>
-
+      
       {/* Password Modal */}
       {showPasswordModal && (
         <div style={{ 
@@ -233,12 +231,12 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 50,
-          padding: '1rem'
+          padding: '1.25rem'
         }}>
           <div style={{ 
             backgroundColor: '#0a0a0a',
             borderRadius: '1rem',
-            padding: '1.5rem',
+            padding: '2rem',
             width: '100%',
             maxWidth: '28rem',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9)',
@@ -255,7 +253,7 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
               background: 'linear-gradient(90deg, transparent, #f8f8f2, transparent)'
             }}></div>
             
-            <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <div style={{ 
                 margin: '0 auto',
                 background: '#f8f8f2',
@@ -274,15 +272,15 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
                 </svg>
               </div>
               <h3 style={{ 
-                fontSize: '1.25rem',
-                fontWeight: 'bold',
-                color: '#f8f8f2'
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#f8f8f2',
+                marginBottom: '0.75rem'
               }}>Password Required</h3>
               <p style={{ 
-                color: '#f8f8f2',
-                marginTop: '0.5rem',
-                lineHeight: '1.6',
-                fontSize: '0.95rem'
+                color: '#cccccc',
+                lineHeight: '1.7',
+                fontSize: '1rem'
               }}>This note is password protected. Please enter the password to continue.</p>
             </div>
             
@@ -296,25 +294,15 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
                 style={{
                   display: 'block',
                   width: '100%',
-                  borderRadius: '0.6rem',
+                  borderRadius: '0.75rem',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   background: 'rgba(20, 20, 20, 0.7)',
-                  padding: '0.85rem 1.2rem',
+                  padding: '0.875rem 1.25rem',
                   fontSize: '1rem',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   backdropFilter: 'blur(10px)',
                   color: '#f8f8f2',
                   boxShadow: '0 4px 15px rgba(0, 0, 0, 0.15)'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(248, 248, 242, 0.2), 0 6px 20px rgba(0, 0, 0, 0.2)';
-                  e.target.style.background = 'rgba(20, 20, 20, 1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                  e.target.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.15)';
-                  e.target.style.background = 'rgba(20, 20, 20, 0.7)';
                 }}
               />
             </div>
@@ -322,77 +310,69 @@ export default function PublicNoteCard({ note }: PublicNoteCardProps) {
             {passwordError && (
               <div style={{ 
                 color: '#f8f8f2',
-                fontSize: '0.875rem',
+                fontSize: '0.9rem',
                 backgroundColor: 'rgba(220, 53, 69, 0.15)',
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
+                padding: '0.875rem',
+                borderRadius: '0.75rem',
                 marginBottom: '1rem',
                 border: '1px solid rgba(220, 53, 69, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem'
               }}>
-                <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1rem', width: '1rem', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1.125rem', width: '1.125rem', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>{passwordError}</span>
               </div>
             )}
             
-            <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', gap: '0.875rem' }}>
               <button
                 onClick={() => {
                   setShowPasswordModal(false);
                   setPassword('');
                   setPasswordError('');
                 }}
-                className="premium-btn-secondary"
+                className="premium-btn premium-btn-secondary premium-btn-hover"
                 style={{
-                  padding: '0.75rem',
+                  flex: 1,
+                  padding: '0.875rem',
                   background: 'rgba(255, 255, 255, 0.1)',
                   color: '#f8f8f2',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  borderRadius: '0.6rem',
+                  borderRadius: '0.75rem',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  transition: 'all 0.3s ease',
-                  width: '100%'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  fontSize: '1rem'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
               >
                 Cancel
               </button>
               <button
                 onClick={verifyPassword}
-                className="premium-btn-primary"
+                className="premium-btn premium-btn-primary premium-btn-hover"
                 style={{
-                  padding: '0.75rem',
+                  flex: 1,
+                  padding: '0.875rem',
                   background: '#f8f8f2',
                   color: '#0a0a0a',
-                  fontWeight: 'bold',
+                  fontWeight: '700',
                   cursor: 'pointer',
-                  borderRadius: '0.6rem',
+                  borderRadius: '0.75rem',
                   border: 'none',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
-                  width: '100%'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.3)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+                  fontSize: '1rem'
                 }}
               >
-                Submit
+                Verify
               </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

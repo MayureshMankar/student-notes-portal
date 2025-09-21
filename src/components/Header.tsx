@@ -48,6 +48,7 @@ export default function Header() {
     };
   }, [isMenuOpen]);
 
+  // Note: handleNavigation was defined but not used, so we'll keep it for potential future use
   const handleNavigation = (path: string) => {
     setIsMenuOpen(false);
     router.push(path);

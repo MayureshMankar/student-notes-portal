@@ -17,9 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // Try to use MongoDB
       try {
         note = await Note.findById(id);
-      } catch (err) {
+      } catch (error) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', err);
+        console.warn('MongoDB query failed, using in-memory storage:', error);
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (isConnected) {
       try {
         note = await Note.findById(id);
-      } catch (err) {
+      } catch (error) {
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -104,8 +104,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (isConnected) {
       try {
         updatedNote = await Note.findByIdAndUpdate(id, updateData, { new: true });
-      } catch (err) {
-        console.warn('MongoDB update failed, using in-memory storage:', err);
+      } catch (error) {
+        console.warn('MongoDB update failed, using in-memory storage:', error);
         updatedNote = updateNoteInMemory(id, updateData);
       }
     } else {
@@ -140,7 +140,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (isConnected) {
       try {
         note = await Note.findById(id);
-      } catch (err) {
+      } catch (error) {
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -168,8 +168,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (isConnected) {
       try {
         await Note.findByIdAndDelete(id);
-      } catch (err) {
-        console.warn('MongoDB delete failed:', err);
+      } catch (error) {
+        console.warn('MongoDB delete failed:', error);
         // For in-memory storage, we would need to implement deletion
         // This is a simplified implementation
       }
