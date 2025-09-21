@@ -26,22 +26,18 @@ export default function Home() {
     const fetchPublicNotes = async () => {
       try {
         const response = await fetch('/api/notes');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
         const data = await response.json();
         
         if (data.success) {
-          // Filter for public notes only
-          const publicNotesData = data.data.filter((note: INote) => !note.isPasswordProtected);
-          setPublicNotes(publicNotesData);
-          setFilteredNotes(publicNotesData);
+          // Show all notes (both public and protected)
+          const allNotes = data.data;
+          setPublicNotes(allNotes);
+          setFilteredNotes(allNotes);
         } else {
-          setError(data.error || 'Failed to fetch public notes');
+          setError('Failed to fetch notes');
         }
       } catch (error) {
-        console.error('Error fetching public notes:', error);
-        setError('Failed to fetch public notes. Please try again later.');
+        setError('Failed to fetch notes');
       } finally {
         setLoading(false);
       }
@@ -293,7 +289,7 @@ export default function Home() {
       {/* Mobile Search Bar */}
       <div className="mobile-search-container" style={{ 
         display: 'none',
-        marginBottom: '2rem'
+        marginBottom: '1.5rem'
       }}>
         <div style={{ width: '100%' }}>
           <HeaderSearch onSearch={handleSearch} />
@@ -310,7 +306,7 @@ export default function Home() {
           color: '#f8f8f8',
           letterSpacing: '0.25px'
         }}>
-          Latest Notes
+          All Notes
         </h2>
         {filteredNotes.length > 0 ? (
           <div className="notes-grid">
