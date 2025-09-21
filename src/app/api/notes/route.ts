@@ -27,16 +27,6 @@ const getFileTypeFromExtension = (filename: string): string => {
   return mimeTypes[extension] || 'application/octet-stream';
 };
 
-// Helper function to determine if preview is available for a file type
-const isPreviewAvailable = (fileType: string): boolean => {
-  const previewableTypes = [
-    'application/pdf',
-    'text/plain',
-    'text/csv'
-  ];
-  return previewableTypes.includes(fileType);
-};
-
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
@@ -52,9 +42,9 @@ export async function GET(request: NextRequest) {
       try {
         // Show all notes to everyone (public visibility)
         notes = await Note.find({}).sort({ uploadDate: -1 });
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', error);
+        console.warn('MongoDB query failed, using in-memory storage:', err);
         notes = getAllNotesInMemory();
       }
     } else {
@@ -63,8 +53,8 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json({ success: true, data: notes });
-  } catch (error) {
-    console.error('Error fetching notes:', error);
+  } catch (err) {
+    console.error('Error fetching notes:', err);
     return NextResponse.json({ success: false, error: 'Failed to fetch notes' }, { status: 500 });
   }
 }
@@ -99,9 +89,8 @@ export async function POST(request: NextRequest) {
     
     await writeFile(path, buffer);
     
-    // Determine file type and preview availability
+    // Determine file type
     const fileType = file.type || getFileTypeFromExtension(file.name);
-    const previewAvailable = isPreviewAvailable(fileType);
     
     // Prepare note data for MongoDB and in-memory storage
     const baseNoteData = {
@@ -113,7 +102,6 @@ export async function POST(request: NextRequest) {
       originalname: file.name,
       fileSize: file.size,
       fileType,
-      previewAvailable,
       isPasswordProtected: !!password,
       password
     };
@@ -132,9 +120,9 @@ export async function POST(request: NextRequest) {
         if (userId) {
           await User.findByIdAndUpdate(userId, { $push: { notes: note._id } });
         }
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
-        console.warn('MongoDB create failed, using in-memory storage:', error);
+        console.warn('MongoDB create failed, using in-memory storage:', err);
         note = createNoteInMemory(noteData);
       }
     } else {
@@ -143,8 +131,8 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json({ success: true, data: note });
-  } catch (error) {
-    console.error('Error uploading note:', error);
+  } catch (err) {
+    console.error('Error uploading note:', err);
     return NextResponse.json({ success: false, error: 'Failed to upload note' }, { status: 500 });
   }
 }

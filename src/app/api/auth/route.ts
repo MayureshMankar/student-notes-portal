@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       let existingUser;
       try {
         existingUser = await User.findOne({ email });
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
         existingUser = findUserByEmailInMemory(email);
       }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       let user;
       try {
         user = await User.create(userData);
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
         user = createUserInMemory(userData);
       }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       let user;
       try {
         user = await User.findOne({ email });
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
         user = findUserByEmailInMemory(email);
       }
@@ -110,8 +110,8 @@ export async function POST(request: NextRequest) {
           });
           console.log('Associated legacy notes with user (in-memory):', count);
         }
-      } catch (error) {
-        console.warn('Failed to associate legacy notes with user:', error);
+      } catch (err) {
+        console.warn('Failed to associate legacy notes with user:', err);
       }
       
       // Return session ID to client
@@ -133,8 +133,8 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
-  } catch (error) {
-    console.error('Auth error:', error);
+  } catch (err) {
+    console.error('Auth error:', err);
     return NextResponse.json({ success: false, error: 'Authentication failed' }, { status: 500 });
   }
 }

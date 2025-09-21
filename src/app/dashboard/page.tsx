@@ -6,8 +6,16 @@ import Link from 'next/link';
 import NoteCard from '@/components/NoteCard';
 import { INote } from '@/models/Note';
 
+// Define the user interface
+interface IUser {
+  _id: string;
+  name: string;
+  email: string;
+  // Add other user properties as needed
+}
+
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [userNotes, setUserNotes] = useState<INote[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<INote[]>([]);
   const [loading, setLoading] = useState(true);

@@ -23,9 +23,9 @@ export async function GET(request: NextRequest) {
         // Get notes owned by the user
         notes = await Note.find({ ownerId: userId }).sort({ uploadDate: -1 });
         console.log('Fetched notes from MongoDB for user:', userId, notes.length);
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', error);
+        console.warn('MongoDB query failed, using in-memory storage:', err);
         const allNotes = getAllNotesInMemory();
         notes = allNotes.filter(note => note.ownerId === userId);
       }
@@ -37,8 +37,8 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json({ success: true, data: notes });
-  } catch (error) {
-    console.error('Error fetching user notes:', error);
+  } catch (err) {
+    console.error('Error fetching user notes:', err);
     return NextResponse.json({ success: false, error: 'Failed to fetch notes' }, { status: 500 });
   }
 }

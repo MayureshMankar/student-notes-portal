@@ -16,11 +16,6 @@ export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Define the headers type
-  interface Headers {
-    [key: string]: string;
-  }
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -55,7 +50,7 @@ export default function UploadPage() {
       const sessionId = localStorage.getItem('sessionId');
       
       // Prepare headers
-      const headers: any = {};
+      const headers: Record<string, string> = {};
       if (sessionId) {
         headers['Authorization'] = `Bearer ${sessionId}`;
       }

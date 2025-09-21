@@ -17,9 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // Try to use MongoDB
       try {
         note = await Note.findById(id);
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', error);
+        console.warn('MongoDB query failed, using in-memory storage:', err);
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (isConnected) {
       try {
         await Note.findByIdAndUpdate(id, { $inc: { downloadCount: 1 } });
-      } catch (error) {
-        console.warn('Failed to update download count in MongoDB:', error);
+      } catch (err) {
+        console.warn('Failed to update download count in MongoDB:', err);
         // Fallback to in-memory update
         updateNoteInMemory(id, { downloadCount: (note.downloadCount || 0) + 1 });
       }
@@ -63,8 +63,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     response.headers.set('Content-Disposition', `attachment; filename="${note.originalname}"`);
     
     return response;
-  } catch (error) {
-    console.error('Error downloading note:', error);
+  } catch (err) {
+    console.error('Error downloading note:', err);
     return new NextResponse('Failed to download note', { status: 500 });
   }
 }
@@ -85,9 +85,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       // Try to use MongoDB
       try {
         note = await Note.findById(id);
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', error);
+        console.warn('MongoDB query failed, using in-memory storage:', err);
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -106,8 +106,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     
     // Return success for access granted
     return NextResponse.json({ success: true, message: 'Access granted' });
-  } catch (error) {
-    console.error('Error verifying password:', error);
+  } catch (err) {
+    console.error('Error verifying password:', err);
     return NextResponse.json({ success: false, error: 'Failed to verify password' }, { status: 500 });
   }
 }

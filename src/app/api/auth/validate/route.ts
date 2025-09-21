@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     try {
       user = await User.findById(userId);
       console.log('Found user in MongoDB:', user?._id);
-    } catch (error) {
+    } catch (err) {
       // Fallback to in-memory storage
       console.log('Falling back to in-memory storage for user lookup');
       user = findUserByIdInMemory(userId);
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
         }
       } 
     });
-  } catch (error) {
-    console.error('Session validation error:', error);
+  } catch (err) {
+    console.error('Session validation error:', err);
     return NextResponse.json({ success: false, error: 'Session validation failed' }, { status: 500 });
   }
 }

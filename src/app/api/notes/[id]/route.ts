@@ -17,9 +17,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // Try to use MongoDB
       try {
         note = await Note.findById(id);
-      } catch (error) {
+      } catch (err) {
         // Fallback to in-memory storage
-        console.warn('MongoDB query failed, using in-memory storage:', error);
+        console.warn('MongoDB query failed, using in-memory storage:', err);
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (isConnected) {
       try {
         note = await Note.findById(id);
-      } catch (error) {
+      } catch (err) {
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -80,7 +80,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { title, description, subject, tags, isPasswordProtected, password } = await request.json();
     
     // Prepare update data
-    const updateData: any = {
+    const updateData: {
+      title: string;
+      description: string;
+      subject: string;
+      tags: string[];
+      isPasswordProtected: boolean;
+      password?: string;
+    } = {
       title,
       description,
       subject: subject || 'General',
@@ -97,8 +104,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (isConnected) {
       try {
         updatedNote = await Note.findByIdAndUpdate(id, updateData, { new: true });
-      } catch (error) {
-        console.warn('MongoDB update failed, using in-memory storage:', error);
+      } catch (err) {
+        console.warn('MongoDB update failed, using in-memory storage:', err);
         updatedNote = updateNoteInMemory(id, updateData);
       }
     } else {
@@ -133,7 +140,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (isConnected) {
       try {
         note = await Note.findById(id);
-      } catch (error) {
+      } catch (err) {
         note = findNoteByIdInMemory(id);
       }
     } else {
@@ -161,8 +168,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     if (isConnected) {
       try {
         await Note.findByIdAndDelete(id);
-      } catch (error) {
-        console.warn('MongoDB delete failed:', error);
+      } catch (err) {
+        console.warn('MongoDB delete failed:', err);
         // For in-memory storage, we would need to implement deletion
         // This is a simplified implementation
       }

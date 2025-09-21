@@ -11,7 +11,6 @@ export interface INote extends Document {
   originalname: string;
   fileSize: number;
   fileType: string;
-  previewAvailable: boolean;
   uploadDate: Date;
   downloadCount: number;
   // Privacy settings
@@ -30,7 +29,6 @@ const NoteSchema: Schema = new Schema({
   originalname: { type: String, required: true },
   fileSize: { type: Number, required: true },
   fileType: { type: String },
-  previewAvailable: { type: Boolean, default: false },
   uploadDate: { type: Date, default: Date.now },
   downloadCount: { type: Number, default: 0 },
   // Privacy settings
@@ -51,7 +49,6 @@ export const createNoteInMemory = (noteData: Partial<INote>) => {
     originalname: noteData.originalname || '',
     fileSize: noteData.fileSize || 0,
     fileType: noteData.fileType || '',
-    previewAvailable: noteData.previewAvailable || false,
     uploadDate: new Date(),
     downloadCount: 0,
     isPasswordProtected: noteData.isPasswordProtected || false,
