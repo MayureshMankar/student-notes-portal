@@ -13,7 +13,6 @@ const HeaderSearch = dynamic(() => import('./HeaderSearch'), {
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -32,25 +31,14 @@ export default function Header() {
       }
     };
 
-    // Check online status
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
     if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     window.addEventListener('resize', handleResize);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    // Initial online status check
-    setIsOnline(navigator.onLine);
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
     };
   }, [isMenuOpen]);
 
@@ -71,19 +59,6 @@ export default function Header() {
       padding: '1rem 0',
       boxShadow: '0 5px 30px rgba(0, 0, 0, 0.5)'
     }}>
-      {/* Offline indicator */}
-      {!isOnline && (
-        <div style={{
-          backgroundColor: '#dc3545',
-          color: 'white',
-          textAlign: 'center',
-          padding: '0.5rem',
-          fontSize: '0.9rem'
-        }}>
-          You are currently offline. Some features may be limited.
-        </div>
-      )}
-      
       <div className="premium-container" style={{ 
         maxWidth: '1200px',
         margin: '0 auto',
