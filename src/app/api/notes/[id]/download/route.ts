@@ -39,8 +39,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return new NextResponse('Access denied. Invalid password.', { status: 403 });
     }
     
-    const path = join(process.cwd(), 'public/uploads', note.filename);
-    const fileBuffer = await readFile(path);
+    let fileBuffer;
+    
+    // Check if file is stored as base64 in the database
+    if (note.fileData) {
+      // File is stored as base64 in the database
+      fileBuffer = Buffer.from(note.fileData, 'base64');
+    } else {
+      // File is stored on the file system (legacy support)
+      const path = join(process.cwd(), 'public/uploads', note.filename);
+      fileBuffer = await readFile(path);
+    }
     
     // Increment download count
     if (isConnected) {

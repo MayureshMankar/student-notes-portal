@@ -549,7 +549,9 @@ export default function UploadPage() {
                         maxWidth: '80%',
                         lineHeight: '1.6'
                       }}>
-                        PDF, DOC, DOCX, TXT, PPT, PPTX, XLS, XLSX, CSV, JPG, JPEG, PNG, GIF (MAX. 10MB)
+                        PDF, DOC, DOCX, TXT, PPT, PPTX, XLS, XLSX, CSV, JPG, JPEG, PNG, GIF, 
+                        PY, JS, TS, HTML, CSS, JAVA, CPP, C, H, HPP, SQL, PHP, RB, GO, RS, 
+                        SH, YAML, JSON, XML, MD (MAX. 10MB)
                       </p>
                     </div>
                     <input 
@@ -558,7 +560,7 @@ export default function UploadPage() {
                       onChange={handleFileChange} 
                       className="hidden" 
                       style={{ display: 'none' }} 
-                      accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif"
+                      accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.py,.js,.ts,.html,.css,.java,.cpp,.c,.h,.hpp,.sql,.php,.rb,.go,.rs,.sh,.yaml,.yml,.json,.xml,.md"
                     />
                   </label>
                 </div>

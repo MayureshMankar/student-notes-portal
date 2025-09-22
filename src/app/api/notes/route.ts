@@ -23,7 +23,29 @@ const getFileTypeFromExtension = (filename: string): string => {
     'jpg': 'image/jpeg',
     'jpeg': 'image/jpeg',
     'png': 'image/png',
-    'gif': 'image/gif'
+    'gif': 'image/gif',
+    // Programming files
+    'py': 'text/x-python',
+    'js': 'text/javascript',
+    'ts': 'text/typescript',
+    'html': 'text/html',
+    'css': 'text/css',
+    'java': 'text/x-java-source',
+    'cpp': 'text/x-c++src',
+    'c': 'text/x-csrc',
+    'h': 'text/x-chdr',
+    'hpp': 'text/x-c++hdr',
+    'sql': 'text/x-sql',
+    'php': 'text/x-php',
+    'rb': 'text/x-ruby',
+    'go': 'text/x-go',
+    'rs': 'text/x-rust',
+    'sh': 'application/x-sh',
+    'yaml': 'text/yaml',
+    'yml': 'text/yaml',
+    'json': 'application/json',
+    'xml': 'application/xml',
+    'md': 'text/markdown'
   };
   return mimeTypes[extension] || 'application/octet-stream';
 };
@@ -95,42 +117,25 @@ export async function POST(request: NextRequest) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       
-      // Use tmp directory for Vercel compatibility
+      // Use tmp directory for Vercel compatibility (read-only file system)
       const tmpDir = '/tmp'; // Vercel writable directory
       const filename = `${Date.now()}-${file.name}`;
       const tmpPath = join(tmpDir, filename);
       console.log('Temporary file path:', tmpPath);
       
-      // Write file to tmp directory first
+      // Write file to tmp directory
       await writeFile(tmpPath, buffer);
       console.log('File written to tmp directory');
       
-      // Move file to public/uploads directory
-      const uploadsDir = join(process.cwd(), 'public/uploads');
-      console.log('Uploads directory path:', uploadsDir);
-      
-      if (!existsSync(uploadsDir)) {
-        console.log('Creating uploads directory');
-        mkdirSync(uploadsDir, { recursive: true });
-      }
-      
-      const finalPath = join(uploadsDir, filename);
-      console.log('Final file path:', finalPath);
-      
-      // Read from tmp and write to final location
-      const tmpBuffer = await readFile(tmpPath);
-      await writeFile(finalPath, tmpBuffer);
-      
-      // Remove tmp file
-      try {
-        await unlink(tmpPath);
-        console.log('Temporary file removed');
-      } catch (unlinkError) {
-        console.warn('Failed to remove temporary file:', unlinkError);
-      }
+      // For Vercel deployment, we need to store files differently
+      // We'll store the file data in MongoDB as base64 for small files
+      // For larger files, we would need to use a storage service like AWS S3
       
       // Determine file type
       const fileType = file.type || getFileTypeFromExtension(file.name);
+      
+      // Convert file to base64 for storage in MongoDB
+      const fileBase64 = buffer.toString('base64');
       
       // Prepare note data for MongoDB and in-memory storage
       const baseNoteData = {
@@ -142,6 +147,7 @@ export async function POST(request: NextRequest) {
         originalname: file.name,
         fileSize: file.size,
         fileType,
+        fileData: fileBase64, // Store file data as base64
         isPasswordProtected: !!password,
         password
       };
@@ -161,6 +167,14 @@ export async function POST(request: NextRequest) {
           if (userId) {
             await User.findByIdAndUpdate(userId, { $push: { notes: note._id } });
           }
+          
+          // Clean up tmp file
+          try {
+            await unlink(tmpPath);
+            console.log('Temporary file removed');
+          } catch (unlinkError) {
+            console.warn('Failed to remove temporary file:', unlinkError);
+          }
         } catch (err) {
           // Fallback to in-memory storage
           console.warn('MongoDB create failed, using in-memory storage:', err);
@@ -174,12 +188,14 @@ export async function POST(request: NextRequest) {
       
       console.log('Upload successful');
       return NextResponse.json({ success: true, data: note });
-    } catch (fileError: any) {
+    } catch (fileError: unknown) {
       console.error('File handling error:', fileError);
-      return NextResponse.json({ success: false, error: `File handling failed: ${fileError.message || 'Unknown error'}` }, { status: 500 });
+      const errorMessage = fileError instanceof Error ? fileError.message : 'Unknown error';
+      return NextResponse.json({ success: false, error: `File handling failed: ${errorMessage}` }, { status: 500 });
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error uploading note:', err);
-    return NextResponse.json({ success: false, error: `Failed to upload note: ${err.message || 'Unknown error'}` }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: `Failed to upload note: ${errorMessage}` }, { status: 500 });
   }
 }
