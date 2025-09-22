@@ -30,6 +30,12 @@ export default function UploadPage() {
       return;
     }
     
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadStatus('File size exceeds 10MB limit. Please choose a smaller file.');
+      return;
+    }
+    
     setIsUploading(true);
     setUploadStatus('Uploading...');
     
@@ -82,10 +88,11 @@ export default function UploadPage() {
         }, 1500);
       } else {
         setUploadStatus(`Upload failed: ${data.error}`);
+        console.error('Upload error details:', data);
       }
     } catch (error) {
       console.error('Upload error:', error);
-      setUploadStatus('Upload failed. Please try again.');
+      setUploadStatus('Upload failed. Please try again. Check console for details.');
     } finally {
       setIsUploading(false);
     }
